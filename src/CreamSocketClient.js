@@ -1,5 +1,3 @@
-// AdvancedSocketClient.js
-
 const net = require('net');
 const crypto = require('crypto');
 const EventEmitter = require('events');

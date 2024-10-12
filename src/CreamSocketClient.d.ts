@@ -1,7 +1,5 @@
-// AdvancedSocketClient.d.ts
-
 /**
- * Options for initializing the AdvancedSocketClient.
+ * Options for initializing the CreamSocketClient.
  */
 export interface CreamSocketClientOptions {
   /**
