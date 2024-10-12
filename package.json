@@ -1,0 +1,23 @@
+{
+  "name": "creamsocketclient",
+  "version": "1.0.0",
+  "description": "a websocket client for instant communication",
+  "main": "src/CreamSocketClient.js",
+  "types": "src/CreamSocketClient.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliassn/creamSocketClient.git"
+  },
+  "keywords": [
+    "creamSocket"
+  ],
+  "author": "Elies Chelbi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eliassn/creamSocketClient/issues"
+  },
+  "homepage": "https://github.com/eliassn/creamSocketClient#readme"
+}
