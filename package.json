@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/eliassn/creamSocketClient/issues"
   },
-  "homepage": "https://github.com/eliassn/creamSocketClient#readme"
+  "homepage": "https://github.com/eliassn/creamSocketClient#readme",
+  "devDependencies": {
+    "@types/node": "^22.7.5"
+  }
 }
