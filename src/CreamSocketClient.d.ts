@@ -78,26 +78,56 @@ export declare class CreamSocketClient extends EventEmitter {
   /**
    * Emits an 'open' event when the connection is successfully established.
    *
-   * @event CreamSocketClientOptions#open
+   * @event AdvancedSocketClient#open
    */
+  on(event: 'open', listener: () => void): this;
 
   /**
    * Emits a 'message' event when a message is received from the server.
    *
-   * @event CreamSocketClientOptions#message
+   * @event AdvancedSocketClient#message
    * @param {string} message - The received message.
    */
+  on(event: 'message', listener: (message: string) => void): this;
 
   /**
    * Emits a 'close' event when the connection is closed by the server.
    *
-   * @event CreamSocketClientOptions#close
+   * @event AdvancedSocketClient#close
    */
+  on(event: 'close', listener: () => void): this;
 
   /**
    * Emits an 'error' event when an error occurs.
    *
-   * @event CreamSocketClientOptions#error
+   * @event AdvancedSocketClient#error
    * @param {Error} error - The encountered error.
    */
+  on(event: 'error', listener: (error: Error) => void): this;
+
+  /**
+   * Removes a listener for the specified event.
+   *
+   * @param {string} event - The event name.
+   * @param {Function} listener - The listener function to remove.
+   * @returns {this}
+   */
+  off(event: 'open', listener: () => void): this;
+  off(event: 'message', listener: (message: string) => void): this;
+  off(event: 'close', listener: () => void): this;
+  off(event: 'error', listener: (error: Error) => void): this;
+  off(event: string, listener: Function): this;
+
+  /**
+   * Overrides the EventEmitter's emit method for type safety.
+   *
+   * @param {string} event - The event name.
+   * @param  {...any} args - The event arguments.
+   * @returns {boolean}
+   */
+  emit(event: 'open'): boolean;
+  emit(event: 'message', message: string): boolean;
+  emit(event: 'close'): boolean;
+  emit(event: 'error', error: Error): boolean;
+  emit(event: string, ...args: any[]): boolean;
 }
