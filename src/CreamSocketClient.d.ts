@@ -29,7 +29,7 @@ export interface CreamSocketClientOptions {
  */
 export declare class CreamSocketClient extends EventEmitter {
   /**
-   * Creates an instance of AdvancedSocketClient.
+   * Creates an instance of CreamSocketClient.
    *
    * @param {CreamSocketClientOptions} options - Client configuration options.
    */
