@@ -1,6 +1,6 @@
-const net = require('net');
-const crypto = require('crypto');
-const EventEmitter = require('events');
+import net from 'net';
+import crypto from 'crypto';
+import EventEmitter from 'events';
 
 /**
  * Represents a WebSocket client.
