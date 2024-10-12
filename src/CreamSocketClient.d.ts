@@ -76,14 +76,14 @@ export declare class CreamSocketClient extends EventEmitter {
   /**
    * Emits an 'open' event when the connection is successfully established.
    *
-   * @event AdvancedSocketClient#open
+   * @event CreamSocketClient#open
    */
   on(event: 'open', listener: () => void): this;
 
   /**
    * Emits a 'message' event when a message is received from the server.
    *
-   * @event AdvancedSocketClient#message
+   * @event CreamSocketClient#message
    * @param {string} message - The received message.
    */
   on(event: 'message', listener: (message: string) => void): this;
@@ -91,14 +91,14 @@ export declare class CreamSocketClient extends EventEmitter {
   /**
    * Emits a 'close' event when the connection is closed by the server.
    *
-   * @event AdvancedSocketClient#close
+   * @event CreamSocketClient#close
    */
   on(event: 'close', listener: () => void): this;
 
   /**
    * Emits an 'error' event when an error occurs.
    *
-   * @event AdvancedSocketClient#error
+   * @event CreamSocketClient#error
    * @param {Error} error - The encountered error.
    */
   on(event: 'error', listener: (error: Error) => void): this;
