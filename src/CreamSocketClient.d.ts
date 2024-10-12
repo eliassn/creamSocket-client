@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 /**
  * Options for initializing the CreamSocketClient.
  */
