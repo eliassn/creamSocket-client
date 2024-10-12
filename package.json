@@ -1,7 +1,7 @@
 {
   "name": "creamsocketclient",
   "version": "1.0.2",
-  "description": "a websocket client for instant communication",
+  "description": "a websocket client framework for instant communication no external libraries",
   "main": "src/CreamSocketClient.js",
   "types": "src/CreamSocketClient.d.ts",
   "scripts": {
