@@ -4,7 +4,7 @@ A client for webSocket interaction
 
 // client.js
 
-const { CreamSocketClient } = require('./AdvancedSocketClient');
+const { CreamSocketClient } = require('./CreamSocketClient');
 
 const client = new CreamSocketClient({
   host: 'localhost',
