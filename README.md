@@ -1,10 +1,11 @@
 # creamSocketClient
+#if you are using typescript try adding the following line to your tsconfig file "moduleResolution": "NodeNext",
 A client for webSocket interaction
 ```javascript
 
 // client.js
 
-const { CreamSocketClient } = require('creamsocket-client');
+import { CreamSocketClient } from 'creamsocket-client';
 
 const client = new CreamSocketClient({
   host: 'localhost',
