@@ -103,11 +103,11 @@ export class CreamSocketClient extends EventEmitter {
   }
    /**
    * Sends a notification to the server.
-   * @param {string} message - The notification to send.
+   * @param {string} notification - The notification to send.
    */
-  sendNotification(notification) {
+ sendNotification(notification) {
     if (this.connected) {
-      const frame = this._encodeFrame(notification, 0x2); // Assuming opcode 0x2 for notifications
+      const frame = this._encodeFrame(notification, 0x2); // Opcode 0x2 for notification
       this.socket.write(frame);
     } else {
       console.error('Cannot send notification. Not connected.');
@@ -153,6 +153,9 @@ export class CreamSocketClient extends EventEmitter {
     switch (frame.opcode) {
       case 0x1: // Text frame
         this.emit('message', frame.payload);
+        break;
+      case 0x2: // Notification frame
+        this.emit('notification', frame.payload);
         break;
       case 0x8: // Connection close
         this.disconnect();
