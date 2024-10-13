@@ -101,7 +101,18 @@ export class CreamSocketClient extends EventEmitter {
       console.error('Cannot send message. Not connected.');
     }
   }
-
+   /**
+   * Sends a notification to the server.
+   * @param {string} message - The notification to send.
+   */
+  sendNotification(notification) {
+    if (this.connected) {
+      const frame = this._encodeFrame(notification, 0x2); // Assuming opcode 0x2 for notifications
+      this.socket.write(frame);
+    } else {
+      console.error('Cannot send notification. Not connected.');
+    }
+  }
   /**
    * Sends a Ping frame to the server to keep the connection alive.
    * @param {string} [payload=''] - Optional payload for the Ping.
