@@ -94,6 +94,13 @@ export declare class CreamSocketClient extends EventEmitter {
    * @param {string} message - The received message.
    */
   on(event: 'message', listener: (message: string) => void): this;
+   /**
+   * Emits a 'notification' event when a notification is received from the server.
+   *
+   * @event CreamSocketClient#notification
+   * @param {string} notification - The received notification.
+   */
+   on(event: 'notification', listener: (notification: string) => void): this;
 
   /**
    * Emits a 'close' event when the connection is closed by the server.
@@ -119,6 +126,7 @@ export declare class CreamSocketClient extends EventEmitter {
    */
   off(event: 'open', listener: () => void): this;
   off(event: 'message', listener: (message: string) => void): this;
+  off(event: 'notification', listener: (notification: string) => void): this;
   off(event: 'close', listener: () => void): this;
   off(event: 'error', listener: (error: Error) => void): this;
   off(event: string, listener: Function): this;
@@ -132,6 +140,7 @@ export declare class CreamSocketClient extends EventEmitter {
    */
   emit(event: 'open'): boolean;
   emit(event: 'message', message: string): boolean;
+  emit(event: 'notification', notification: string): boolean;
   emit(event: 'close'): boolean;
   emit(event: 'error', error: Error): boolean;
   emit(event: string, ...args: any[]): boolean;
