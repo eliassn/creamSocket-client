@@ -57,7 +57,13 @@ export declare class CreamSocketClient extends EventEmitter {
    * @returns {void}
    */
   sendMessage(message: string): void;
-
+   /**
+   * Sends a notification to the server.
+   *
+   * @param {string} notification - The notification to send.
+   * @returns {void}
+   */
+  sendNotification(notification: string): void;
   /**
    * Sends a Ping frame to the server to keep the connection alive.
    *
