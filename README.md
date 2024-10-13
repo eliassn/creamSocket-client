@@ -1,5 +1,6 @@
 # creamSocketClient
-#if you are using typescript try adding the following line to your tsconfig file "moduleResolution": "NodeNext",
+## CreamSocketServer now supports notifications
+### if you are using typescript try adding the following line to your tsconfig file "moduleResolution": "NodeNext",
 A client for webSocket interaction
 ```javascript
 
@@ -18,10 +19,15 @@ client.on('open', () => {
 
   // Send a message to the server
   client.sendMessage('Hello, Server!');
+  client.sendNotification('Client has joined the chat.');
 });
 
 client.on('message', (msg) => {
   console.log('Received message from server:', msg);
+});
+
+client.on('notification', (notification) => {
+  console.log('Received notification from server:', notification);
 });
 
 client.on('close', () => {
