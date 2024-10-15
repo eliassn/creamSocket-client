@@ -17,7 +17,13 @@
     "socketjs",
     "socket",
     "socketio",
-    "nodejs socket"
+    "nodejs socket",
+    "webSocket",
+    "webSockets",
+    "message",
+    "messages",
+    "notification",
+    "notifications"
   ],
   "author": "Elies Chelbi",
   "license": "MIT",
