@@ -1,7 +1,11 @@
 # creamSocketClient
-[Documentation](https://github.com/eliassn/creamSocket-client/wiki/CreamSocketClient)
 ## CreamSocketClient now supports notifications
-### if you are using typescript try adding the following line to your tsconfig file "moduleResolution": "NodeNext",
+- Click [Documentation](https://github.com/eliassn/creamSocket-client/wiki/CreamSocketClient)
+- If you like this project please consider support[:heart: Sponsor](https://github.com/sponsors/yourGitHubUserName)
+### if you are using typescript try adding the following line to your tsconfig file 
+```json
+"moduleResolution": "NodeNext"
+```
 A client for webSocket interaction
 ```javascript
 
