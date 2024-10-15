@@ -6,6 +6,7 @@
 ```json
 "moduleResolution": "NodeNext"
 ```
+- Example
 A client for webSocket interaction
 ```javascript
 
