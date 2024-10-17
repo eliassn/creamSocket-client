@@ -23,7 +23,8 @@ export class CreamSocketClient extends EventEmitter {
     host,
     port,
     path = '/',
-    protocols = []
+    protocols = [],
+    format = "json"
   }) {
     super();
     this.host = host;
