@@ -24,16 +24,16 @@ client.on('open', () => {
   console.log('Connected to the server.');
 
   // Send a message to the server
-  client.sendMessage('Hello, Server!');
-  client.sendNotification('Client has joined the chat.');
+  client.sendMessage({ type: 'chat', content: 'Hello, Server!' });
+  client.sendNotification({ type: 'alert', message: 'Client has joined chat' });
 });
 
 client.on('message', (msg) => {
-  console.log('Received message from server:', msg);
+  console.log('Received message from server:', msg || msg.content);
 });
 
 client.on('notification', (notification) => {
-  console.log('Received notification from server:', notification);
+  console.log('Received notification from server:', notification|| notification.message);
 });
 
 client.on('close', () => {
