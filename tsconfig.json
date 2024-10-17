@@ -11,7 +11,9 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "types/CreamSocketParser.d.ts",
+    "types/CreamSocketClient.d.ts"
   ],
   "exclude": [
     "node_modules"

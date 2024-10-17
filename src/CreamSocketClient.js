@@ -1,6 +1,9 @@
 import net from 'net';
 import crypto from 'crypto';
 import EventEmitter from 'events';
+import {
+  CreamSocketParser
+} from './CreamSocketParser.js';
 
 /**
  * Represents a WebSocket client.
@@ -30,6 +33,9 @@ export class CreamSocketClient extends EventEmitter {
     this.socket = null;
     this.connected = false;
     this.heartbeatInterval = null; // To manage heartbeat
+    this.url = url;
+    this.parser = new CreamSocketParser(format);
+    this.socket = new net.Socket();
   }
 
   /**
@@ -90,28 +96,21 @@ export class CreamSocketClient extends EventEmitter {
   }
 
   /**
-   * Sends a text message to the server.
-   * @param {string} message - The message to send.
+   * Sends a message to the server.
+   * @param {string | object} message - The message to send.
    */
   sendMessage(message) {
-    if (this.connected) {
-      const frame = this._encodeFrame(message);
-      this.socket.write(frame);
-    } else {
-      console.error('Cannot send message. Not connected.');
-    }
+    const encodedMessage = this.parser.encode(message);
+    this.socket.write(encodedMessage);
   }
-   /**
+
+  /**
    * Sends a notification to the server.
-   * @param {string} notification - The notification to send.
+   * @param {string | object} notification - The notification to send.
    */
- sendNotification(notification) {
-    if (this.connected) {
-      const frame = this._encodeFrame(notification, 0x2); // Opcode 0x2 for notification
-      this.socket.write(frame);
-    } else {
-      console.error('Cannot send notification. Not connected.');
-    }
+  sendNotification(notification) {
+    const encodedNotification = this.parser.encode(notification);
+    this.socket.write(encodedNotification);
   }
   /**
    * Sends a Ping frame to the server to keep the connection alive.

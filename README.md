@@ -1,5 +1,5 @@
 # creamSocketClient
-## CreamSocketClient now supports notifications
+## CreamSocketClient now has a parser to help you parse different types (json,binary...)
 - Click [Documentation](https://github.com/eliassn/creamSocket-client/wiki/CreamSocketClient)
 - If you like this project please consider support [:heart: Sponsor](https://github.com/sponsors/eliassn)
 ## if you are using typescript try adding the following line to your tsconfig file 
