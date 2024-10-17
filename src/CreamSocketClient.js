@@ -33,7 +33,6 @@ export class CreamSocketClient extends EventEmitter {
     this.socket = null;
     this.connected = false;
     this.heartbeatInterval = null; // To manage heartbeat
-    this.url = url;
     this.parser = new CreamSocketParser(format);
     this.socket = new net.Socket();
   }
