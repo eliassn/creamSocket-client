@@ -1,6 +1,7 @@
 # creamSocketClient
 ## CreamSocketClient now has a parser to help you parse different types (json,binary...)
 - Click [Documentation](https://github.com/eliassn/creamSocket-client/wiki/CreamSocketClient)
+- Click [Example creating a chat app using creamsocket](https://github.com/eliassn/creamSocket-server/wiki/A-comprehensive-guide-of-creating-a-nodejs-chat-app-using-creamsocket-libraries)
 - If you like this project please consider support [:heart: Sponsor](https://github.com/sponsors/eliassn)
 ## if you are using typescript try adding the following line to your tsconfig file 
 ```json
