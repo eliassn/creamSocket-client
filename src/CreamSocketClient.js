@@ -33,98 +33,141 @@ export class CreamSocketClient extends EventEmitter {
     this.protocols = Array.isArray(protocols) ? protocols : [protocols];
     this.socket = null;
     this.connected = false;
-    this.heartbeatInterval = null; // To manage heartbeat
+    this.heartbeatInterval = null;
     this.parser = new CreamSocketParser(format);
-    this.socket = new net.Socket();
+    this.messageQueue = []; // Message queue for offline messages
+    this.connect();
   }
 
-  /**
-   * Initiates a connection to the WebSocket server.
-   */
   connect() {
     this.socket = net.createConnection({
       host: this.host,
       port: this.port
     }, () => {
       console.log('TCP connection established.');
-
-      const key = crypto.randomBytes(16).toString('base64');
-      this._key = key;
-
-      const headers = [
-        `GET ${this.path} HTTP/1.1`,
-        `Host: ${this.host}:${this.port}`,
-        'Upgrade: websocket',
-        'Connection: Upgrade',
-        `Sec-WebSocket-Key: ${key}`,
-        'Sec-WebSocket-Version: 13',
-      ];
-
-      if (this.protocols.length > 0) {
-        headers.push(`Sec-WebSocket-Protocol: ${this.protocols.join(', ')}`);
-      }
-
-      headers.push('\r\n');
-
-      this.socket.write(headers.join('\r\n'));
+      this._performHandshake();
     });
 
-    // Use arrow functions to preserve 'this' context
     this.socket.on('data', (data) => this._handleData(data));
-    this.socket.on('end', () => {
-      console.log('Disconnected from server.');
-      this.connected = false;
-      this.emit('close');
-      this.stopHeartbeat();
-    });
-    this.socket.on('error', (err) => {
-      console.error('Socket error:', err);
-      this.emit('error', err);
-    });
-
-    // Note: 'open' event is not a native event in net.Socket.
-    // It should be emitted after handshake is complete.
+    this.socket.on('end', () => this._handleDisconnect());
+    this.socket.on('error', (err) => this._handleError(err));
   }
 
-  /**
-   * Disconnects from the WebSocket server gracefully.
-   */
+  _performHandshake() {
+    const key = crypto.randomBytes(16).toString('base64');
+    this._key = key;
+
+    const headers = [
+      `GET ${this.path} HTTP/1.1`,
+      `Host: ${this.host}:${this.port}`,
+      'Upgrade: websocket',
+      'Connection: Upgrade',
+      `Sec-WebSocket-Key: ${key}`,
+      'Sec-WebSocket-Version: 13',
+    ];
+
+    if (this.protocols.length > 0) {
+      headers.push(`Sec-WebSocket-Protocol: ${this.protocols.join(', ')}`);
+    }
+
+    headers.push('\r\n');
+    this.socket.write(headers.join('\r\n'));
+  }
+
+  _handleData(data) {
+    if (!this.connected) {
+      this._handleHandshakeResponse(data.toString());
+      return;
+    }
+
+    const frame = this._decodeFrame(data);
+    if (!frame) return;
+
+    switch (frame.opcode) {
+      case 0x1: // Text frame
+        this.emit('message', frame.payload);
+        break;
+      case 0x8: // Connection close
+        this.disconnect();
+        break;
+      case 0x9: // Ping
+        this.pong(frame.payload);
+        break;
+      default:
+        console.log(`Unhandled opcode: ${frame.opcode}`);
+    }
+  }
+
+  _handleHandshakeResponse(response) {
+    if (response.includes('101 Switching Protocols')) {
+      console.log('WebSocket handshake successful.');
+      this.connected = true;
+      this.emit('open');
+      this.startHeartbeat();
+      this.flushQueue();
+    } else {
+      console.error('Invalid handshake response.');
+      this.socket.destroy();
+    }
+  }
+
+  flushQueue() {
+    while (this.messageQueue.length > 0 && this.connected) {
+      const message = this.messageQueue.shift();
+      this.socket.write(message);
+    }
+  }
+
+  sendMessage(message) {
+    const encodedMessage = this.parser.encode(message);
+    if (this.connected) {
+      this.socket.write(encodedMessage);
+    } else {
+      this.messageQueue.push(encodedMessage);
+      console.log('Socket not connected. Message queued:', encodedMessage);
+    }
+  }
+
   disconnect() {
     if (this.socket) {
       this._sendCloseFrame();
     }
   }
 
-  /**
-   * Sends a message to the server.
-   * @param {string | object} message - The message to send.
-   */
-  sendMessage(message) {
-    const encodedMessage = this.parser.encode(message);
-    this.socket.write(encodedMessage);
+  _handleDisconnect() {
+    console.log('Disconnected from server.');
+    this.connected = false;
+    this.emit('close');
+    this.stopHeartbeat();
   }
 
-  /**
-   * Sends a notification to the server.
-   * @param {string | object} notification - The notification to send.
-   */
-  sendNotification(notification) {
-    const encodedNotification = this.parser.encode(notification);
-    this.socket.write(encodedNotification);
+  _handleError(err) {
+    console.error('Socket error:', err);
+    this.emit('error', err);
   }
-  /**
-   * Sends a Ping frame to the server to keep the connection alive.
-   * @param {string} [payload=''] - Optional payload for the Ping.
-   */
+
+  _sendCloseFrame() {
+    const frame = this._encodeFrame('', 0x8);
+    this.socket.write(frame);
+    this.socket.end();
+  }
+
+  startHeartbeat(interval = 30000) {
+    this.heartbeatInterval = setInterval(() => this.ping(), interval);
+  }
+
+  stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
   ping(payload = '') {
     const frame = this._encodeFrame(payload, 0x9);
     this.socket.write(frame);
   }
 
-  /**
-   * Sends a Pong frame to the server in response to a Ping.
-   * @param {string} [payload=''] - Optional payload for the Pong.
-   */
   pong(payload = '') {
     const frame = this._encodeFrame(payload, 0xA);
     this.socket.write(frame);
