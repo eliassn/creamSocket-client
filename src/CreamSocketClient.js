@@ -38,21 +38,34 @@ export class CreamSocketClient extends EventEmitter {
     this.messageQueue = []; // Message queue for offline messages
     this.connect();
   }
-
   connect() {
-    this.socket = net.createConnection({
-      host: this.host,
-      port: this.port
-    }, () => {
-      console.log('TCP connection established.');
-      this._performHandshake();
-    });
+    const url = `ws://${this.host}:${this.port}${this.path}`;
+    this.socket = new WebSocket(url, this.protocols);
 
-    this.socket.on('data', (data) => this._handleData(data));
-    this.socket.on('end', () => this._handleDisconnect());
-    this.socket.on('error', (err) => this._handleError(err));
+    this.socket.onopen = () => {
+      console.log('WebSocket connection established.');
+      this.connected = true;
+      this.emit('open');
+    };
+
+    this.socket.onmessage = (event) => {
+      const data = event.data;
+      const frame = this.parser.decode(data);
+      this.emit('message', frame);
+    };
+
+    this.socket.onclose = () => {
+      console.log('Disconnected from server.');
+      this.connected = false;
+      this.emit('close');
+      this.stopHeartbeat();
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('Socket error:', error);
+      this.emit('error', error);
+    };
   }
-
   _performHandshake() {
     const key = crypto.randomBytes(16).toString('base64');
     this._key = key;
@@ -119,18 +132,15 @@ export class CreamSocketClient extends EventEmitter {
   }
 
   sendMessage(message) {
-    const encodedMessage = this.parser.encode(message);
-    if (this.connected) {
-      this.socket.write(encodedMessage);
-    } else {
-      this.messageQueue.push(encodedMessage);
-      console.log('Socket not connected. Message queued:', encodedMessage);
+    if (this.socket && this.connected) {
+      const encodedMessage = this.parser.encode(message);
+      this.socket.send(encodedMessage);
     }
   }
 
   disconnect() {
     if (this.socket) {
-      this._sendCloseFrame();
+      this.socket.close();
     }
   }
 
