@@ -147,7 +147,7 @@ export class CreamSocketClient extends EventEmitter {
   sendMessage(message) {
     if (this.socket && this.connected) {
       const encodedMessage = this.parser.encode(message);
-      this.socket.send(encodedMessage);
+      this.socket.write(encodedMessage)
     }
   }
 
