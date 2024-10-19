@@ -39,32 +39,45 @@ export class CreamSocketClient extends EventEmitter {
     this.connect();
   }
   connect() {
-    const url = `ws://${this.host}:${this.port}${this.path}`;
-    this.socket = new WebSocket(url, this.protocols);
+    if (typeof window !== 'undefined' && window.WebSocket) {
+      // In a browser environment
+      const url = `ws://${this.host}:${this.port}${this.path}`;
+      this.socket = new WebSocket(url, this.protocols);
 
-    this.socket.onopen = () => {
-      console.log('WebSocket connection established.');
-      this.connected = true;
-      this.emit('open');
-    };
+      this.socket.onopen = () => {
+        console.log('WebSocket connection established.');
+        this.connected = true;
+        this.emit('open');
+      };
 
-    this.socket.onmessage = (event) => {
-      const data = event.data;
-      const frame = this.parser.decode(data);
-      this.emit('message', frame);
-    };
+      this.socket.onmessage = (event) => {
+        const data = event.data;
+        const frame = this.parser.decode(data);
+        this.emit('message', frame);
+      };
 
-    this.socket.onclose = () => {
-      console.log('Disconnected from server.');
-      this.connected = false;
-      this.emit('close');
-      this.stopHeartbeat();
-    };
+      this.socket.onclose = () => {
+        console.log('Disconnected from server.');
+        this.connected = false;
+        this.emit('close');
+        this.stopHeartbeat();
+      };
 
-    this.socket.onerror = (error) => {
-      console.error('Socket error:', error);
-      this.emit('error', error);
-    };
+      this.socket.onerror = (error) => {
+        console.error('Socket error:', error);
+        this.emit('error', error);
+      };
+    } else {
+      this.socket = new net.Socket();
+      this.socket.connect(this.port, this.host, () => {
+        console.log('TCP connection established.');
+        this._performHandshake();
+      });
+
+      this.socket.on('data', (data) => this._handleData(data));
+      this.socket.on('close', () => this._handleDisconnect());
+      this.socket.on('error', (error) => this._handleError(error));
+    }
   }
   _performHandshake() {
     const key = crypto.randomBytes(16).toString('base64');
