@@ -370,24 +370,17 @@ export class CreamSocketClient extends EventEmitter {
     }
 
     let maskingKey;
+
     if (masked) {
       if (buffer.length < offset + 4) {
         console.error('Incomplete masking key.');
         return null;
       }
+
       maskingKey = buffer.slice(offset, offset + 4);
       offset += 4;
-    }
 
-    if (buffer.length < offset + payloadLength) {
-      console.error('Incomplete payload data.');
-      return null;
-    }
-
-    const payload = buffer.slice(offset, offset + payloadLength);
-
-    let decodedPayload = payload;
-    if (masked) {
+      // Apply masking to decode the payload
       decodedPayload = Buffer.alloc(payload.length);
       for (let i = 0; i < payload.length; i++) {
         decodedPayload[i] = payload[i] ^ maskingKey[i % 4];
