@@ -52,9 +52,24 @@ export class CreamSocketClient extends EventEmitter {
       };
 
       this.socket.onmessage = (event) => {
-        const data = event.data;
+        // If data is an ArrayBuffer, convert it to Uint8Array
+        let data;
+        if (event.data instanceof ArrayBuffer) {
+          data = new Uint8Array(event.data);
+        } else if (typeof event.data === 'string') {
+          // If it's a string, convert it to a Uint8Array using TextEncoder
+          data = new TextEncoder().encode(event.data);
+        } else {
+          console.error('Unexpected message type:', typeof event.data);
+          return;
+        }
+
         const frame = this.parser.decode(data);
-        this.emit('message', frame);
+        if (frame) {
+          this.emit('message', frame);
+        } else {
+          console.error('Failed to decode message.');
+        }
       };
 
       this.socket.onclose = () => {
