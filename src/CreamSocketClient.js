@@ -152,7 +152,7 @@ export class CreamSocketClient extends EventEmitter {
   sendMessage(message) {
     if (this.socket && this.connected) {
       const encodedMessage = this.parser.encode(message);
-      this.socket.write(encodedMessage);
+      this.socket.send(encodedMessage);
     } else {
       console.warn('Attempted to send a message while not connected.');
     }
