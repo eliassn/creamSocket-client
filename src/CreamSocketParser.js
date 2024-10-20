@@ -94,6 +94,18 @@ export class CreamSocketParser {
    * @returns {object | string | null} - The processed message or null if invalid.
    */
   handleMessage(data, socket) {
+    // Check if data is already a Uint8Array
+    if (typeof data === 'object' && !(data instanceof Uint8Array)) {
+      // Attempt to convert to Uint8Array, assuming it might be JSON
+      try {
+        const jsonData = JSON.stringify(data);
+        data = new TextEncoder().encode(jsonData);
+      } catch (e) {
+        console.error('Failed to convert message to Uint8Array:', e);
+        return null;
+      }
+    }
+
     const message = this.decode(data);
     if (!message) {
       console.error('Invalid message format.');
