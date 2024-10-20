@@ -8,35 +8,27 @@ export class CreamSocketParser {
    */
   constructor(format = 'json') {
     this.format = format;
+    this.buffer = Buffer.alloc(0); // Use a Buffer for accumulating data
   }
 
   /**
    * Encodes data based on the specified format.
    * @param {string | object} data - The data to encode.
    * @param {number} [opcode=0x1] - The WebSocket opcode (0x1 for text, 0x2 for binary, etc.).
-   * @returns {Buffer} - The encoded frame.
+   * @returns {Buffer} - The encoded frame as a Buffer.
    */
   encode(data, opcode = 0x1) {
     let payload;
 
-    // Encode data based on the format (JSON or binary)
     if (this.format === 'json') {
-      if (typeof data === 'object') {
-        payload = Buffer.from(JSON.stringify(data));
-      } else {
-        payload = Buffer.from(String(data));
-      }
+      payload = new TextEncoder().encode(typeof data === 'object' ? JSON.stringify(data) : String(data));
     } else if (this.format === 'binary') {
-      payload = Buffer.isBuffer(data) ? data : Buffer.from(data);
+      payload = data instanceof Uint8Array ? data : new TextEncoder().encode(data);
     }
 
     const payloadLength = payload.length;
-    const frame = [];
+    const frame = [0x80 | opcode]; // First byte: FIN and opcode
 
-    // First byte: FIN and opcode
-    frame.push(0x80 | opcode);
-
-    // Encode payload length
     if (payloadLength < 126) {
       frame.push(payloadLength);
     } else if (payloadLength < 65536) {
@@ -48,47 +40,59 @@ export class CreamSocketParser {
       }
     }
 
-    // Return the complete frame as a buffer
-    return Buffer.concat([Buffer.from(frame), payload]);
+    // Combine frame and payload into a single Uint8Array
+    const frameBuffer = new Uint8Array(frame.length + payloadLength);
+    frameBuffer.set(new Uint8Array(frame), 0);
+    frameBuffer.set(payload, frame.length);
+
+    return frameBuffer; // Return as Uint8Array
   }
 
   /**
    * Decodes data based on the specified format.
    * @param {Buffer} data - The data to decode.
-   * @returns {object | string | Buffer} - The decoded data.
+   * @returns {object | string | Buffer | null} - The decoded data.
    */
   decode(data) {
-    let decodedData;
-
-    // Decode data based on the format
-    if (this.format === 'json') {
-      try {
-        decodedData = JSON.parse(data.toString());
-      } catch (error) {
-        console.error('Failed to decode JSON data:', error);
-        return null;
-      }
-    } else if (this.format === 'binary') {
-      try {
-        decodedData = Buffer.isBuffer(data) ? data : Buffer.from(data);
-      } catch (error) {
-        console.error('Failed to decode binary data:', error);
-        return data; // Return raw data if unable to decode
-      }
+    // Ensure incoming data is a Uint8Array
+    if (!(data instanceof Uint8Array)) {
+      console.error('Expected a Uint8Array, but received:', data);
+      return null; // Exit if the data is not a Uint8Array
     }
 
-    return decodedData;
-  }
+    this.buffer = new Uint8Array([...this.buffer, ...data]); // Concatenate existing buffer with new data
 
+    let decodedData;
+
+    if (this.format === 'json') {
+      try {
+        const text = new TextDecoder('utf-8').decode(this.buffer);
+        decodedData = JSON.parse(text); // Decode UTF-8 if it's text
+        this.buffer = new Uint8Array(); // Clear buffer
+        return decodedData;
+      } catch (error) {
+        if (error.message.includes('Unexpected end of JSON input')) {
+          return null; // Data not complete
+        } else {
+          console.error('Failed to decode JSON:', error);
+          this.buffer = new Uint8Array(); // Reset buffer
+          return null;
+        }
+      }
+    } else if (this.format === 'binary') {
+      return this.buffer; // Return raw buffer for binary data
+    }
+
+    return null;
+  }
   /**
    * Handles incoming messages.
    * @param {Buffer | string} data - The received message data.
    * @param {net.Socket} socket - The client's socket for potential response.
-   * @returns {object | string | null} - The processed message or notification.
+   * @returns {object | string | null} - The processed message or null if invalid.
    */
   handleMessage(data, socket) {
     const message = this.decode(data);
-
     if (!message) {
       console.error('Invalid message format.');
       return null;
@@ -109,7 +113,7 @@ export class CreamSocketParser {
    * Handles incoming notifications.
    * @param {object} notification - The received notification object.
    * @param {net.Socket} socket - The client's socket for potential response.
-   * @returns {object} - The processed notification.
+   * @returns {object | null} - The processed notification or null if missing payload.
    */
   handleNotification(notification, socket) {
     if (!notification.payload) {
@@ -119,11 +123,10 @@ export class CreamSocketParser {
 
     console.log('Notification received:', notification.payload);
 
-    // If needed, send a response or acknowledgment to the client
     if (notification.responseRequired) {
       const acknowledgment = {
         type: 'ack',
-        message: 'Notification received successfully',
+        message: 'Notification received successfully'
       };
       socket.write(this.encode(acknowledgment));
     }
@@ -139,7 +142,7 @@ export class CreamSocketParser {
   sendMessage(socket, message) {
     const frame = this.encode({
       type: 'message',
-      payload: message,
+      payload: message
     });
     socket.write(frame);
   }
@@ -151,11 +154,12 @@ export class CreamSocketParser {
    */
   sendNotification(socket, notification) {
     const frame = this.encode({
-      type: 'notification',
-      payload: notification,
-      responseRequired: true, // Specify if acknowledgment is needed
-    }, 0x2); // 0x2 for binary data if needed
-
+        type: 'notification',
+        payload: notification,
+        responseRequired: true
+      },
+      0x2 // 0x2 for binary data if needed
+    );
     socket.write(frame);
   }
 }
