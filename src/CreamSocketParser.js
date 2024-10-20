@@ -23,9 +23,8 @@ export class CreamSocketParser {
     if (this.format === 'json') {
       payload = new TextEncoder().encode(typeof data === 'object' ? JSON.stringify(data) : String(data));
     } else if (this.format === 'binary') {
-      payload = data instanceof Uint8Array ? data : new TextEncoder().encode(data);
+      payload = Buffer.isBuffer(data) ? data : Buffer.from(data);
     }
-
     const payloadLength = payload.length;
     const frame = [0x80 | opcode]; // First byte: FIN and opcode
 
@@ -54,6 +53,10 @@ export class CreamSocketParser {
    * @returns {object | string | Buffer | null} - The decoded data.
    */
   decode(data) {
+    if (Buffer.isBuffer(data)) {
+      data = new Uint8Array(data);
+    }
+
     // Ensure incoming data is a Uint8Array
     if (!(data instanceof Uint8Array)) {
       console.error('Expected a Uint8Array, but received:', data);
