@@ -53,10 +53,6 @@ export class CreamSocketParser {
    * @returns {object | string | Buffer | null} - The decoded data.
    */
   decode(data) {
-    if (Buffer.isBuffer(data)) {
-      data = new Uint8Array(data);
-    }
-
     // Ensure incoming data is a Uint8Array
     if (!(data instanceof Uint8Array)) {
       console.error('Expected a Uint8Array, but received:', data);
@@ -88,6 +84,7 @@ export class CreamSocketParser {
 
     return null;
   }
+
   /**
    * Handles incoming messages.
    * @param {Buffer | string} data - The received message data.
