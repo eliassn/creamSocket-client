@@ -113,6 +113,9 @@ export class CreamSocketClient extends EventEmitter {
       case 0x1: // Text frame
         this.emit('message', frame.payload);
         break;
+      case 0x2: // Binary frame
+        this.emit('binary', frame.payload);
+        break;
       case 0x8: // Connection close
         this.disconnect();
         break;
@@ -122,6 +125,7 @@ export class CreamSocketClient extends EventEmitter {
       default:
         console.log(`Unhandled opcode: ${frame.opcode}`);
     }
+
   }
 
   _handleHandshakeResponse(response) {
