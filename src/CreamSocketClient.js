@@ -48,6 +48,7 @@ export class CreamSocketClient extends EventEmitter {
         console.log('WebSocket connection established.');
         this.connected = true;
         this.emit('open');
+        // Avoid sending messages until the connection is confirmed
       };
 
       this.socket.onmessage = (event) => {
@@ -151,7 +152,9 @@ export class CreamSocketClient extends EventEmitter {
   sendMessage(message) {
     if (this.socket && this.connected) {
       const encodedMessage = this.parser.encode(message);
-      this.socket.write(encodedMessage)
+      this.socket.write(encodedMessage);
+    } else {
+      console.warn('Attempted to send a message while not connected.');
     }
   }
 
