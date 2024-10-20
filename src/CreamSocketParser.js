@@ -8,7 +8,7 @@ export class CreamSocketParser {
    */
   constructor(format = 'json') {
     this.format = format;
-    this.buffer = Buffer.alloc(0); // Use a Buffer for accumulating data
+    this.buffer = new Uint8Array(); // Use a Buffer for accumulating data
   }
 
   /**
